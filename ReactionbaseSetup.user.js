@@ -6,6 +6,7 @@
 // @author       Sighery
 // @match        https://rumble.com/v*.html
 // @match        https://reactionbase.site/*
+// @match        https://reactionbase.xyz/*
 // @connect      rumble.com
 // @grant        GM_xmlhttpRequest
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=rumble.com
@@ -45,7 +46,7 @@ function getRumbleEmbedLink() {
 }
 
 function isReactionbaseVideoPage() {
-    let site = window.location.href.match("(reactionbase\.site)");
+    let site = window.location.href.match("(reactionbase\.*)");
     let rumbleVideo = getRumbleEmbedNode();
     if (rumbleVideo === null || site === null) return false;
     return true;
