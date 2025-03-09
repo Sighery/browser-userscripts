@@ -35,25 +35,22 @@ function isFTPaywalled() {
 }
 
 async function isArchiveAvailable() {
-    const methods = ["OPTIONS", "HEAD"];
     const archiveUrl = `https://archive.today/newest/${window.location.href}`;
 
-    for (const method of methods) {
-        try {
-            let response = await GM_xmlhttpRequestPromise({
-                method: method,
-                url: archiveUrl,
-                timeout: 500,
-            });
+    const requests = [
+        GM_xmlhttpRequestPromise({
+            method: "OPTIONS",
+            url: archiveUrl,
+            timeout: 2000,
+        }),
+        // GM_xmlhttpRequestPromise({
+        //     method: "HEAD",
+        //     url: archiveUrl,
+        //     timeout: 2000,
+        // }),
+    ];
 
-            if (response.status === 200) {
-                return archiveUrl;
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    }
-    return null;
+    return Promise.any(requests).then(() => archiveUrl).catch(() => null);
 }
 
 class NetworkError extends Error {
