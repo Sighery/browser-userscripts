@@ -14,16 +14,26 @@
     'use strict';
 
     const paywalled = isPaywalled();
-    const archiveUrl = await isArchiveAvailable();
-    if (archiveUrl !== null) {
-        window.location.assign(archiveUrl);
+
+    if (paywalled !== true) {
+        console.log("Article is not paywalled. Not redirecting.");
+        return false;
     }
+
+    const archiveUrl = await isArchiveAvailable();
+
+    if (archiveUrl === null) {
+        console.warn("Can't find archive. Not redirecting.");
+        return false;
+    }
+
+    window.location.assign(archiveUrl);
 })();
 
 function isPaywalled() {
     // Just Financial Times for now
     let paywalled = false;
-    if (window.location.href.match("(ft\.com\/v)") !== null) {
+    if (window.location.href.match("(ft\.com\/)") !== null) {
         paywalled = isFTPaywalled();
     }
     return paywalled;
