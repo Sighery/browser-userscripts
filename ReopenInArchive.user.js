@@ -40,7 +40,7 @@ function isPaywalled() {
 }
 
 function isFTPaywalled() {
-    let elem = document.querySelector("#recommendedOffers-Recommended Offers");
+    let elem = document.querySelector("[data-component='recommendedOffers']");
     return elem !== null;
 }
 
