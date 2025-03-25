@@ -11,10 +11,23 @@
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=archive.today
 // ==/UserScript==
 
+class Sites {
+    static FT = 0;
+
+    static matchSite() {
+        if (window.location.href.match("(ft\.com\/)") !== null) {
+            return Sites.FT;
+        }
+
+        throw new Error("Site not supported");
+    }
+}
+
 (async function () {
     'use strict';
 
-    const paywalled = isPaywalled();
+    const site = Sites.matchSite();
+    const paywalled = isPaywalled(site);
 
     if (paywalled !== true) {
         console.log("Article is not paywalled. Not redirecting.");
@@ -31,13 +44,13 @@
     window.location.assign(archiveUrl);
 })();
 
-function isPaywalled() {
-    // Just Financial Times for now
-    let paywalled = false;
-    if (window.location.href.match("(ft\.com\/)") !== null) {
-        paywalled = isFTPaywalled();
+function isPaywalled(site) {
+    switch (site) {
+        case Sites.FT:
+            return isFTPaywalled();
+        default:
+            return false;
     }
-    return paywalled;
 }
 
 function isFTPaywalled() {
