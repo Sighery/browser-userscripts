@@ -4,7 +4,7 @@
 // @version      0.2
 // @description  Create direct link to Rumble, and setup Rumble videos to start, set max quality, and use wide view
 // @author       Sighery
-// @match        https://rumble.com/v*.html
+// @match        https://rumble.com/v*.html*
 // @match        https://reactionbase.site/*
 // @match        https://reactionbase.xyz/*
 // @connect      rumble.com
