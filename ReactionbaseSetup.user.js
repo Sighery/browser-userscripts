@@ -10,6 +10,7 @@
 // @connect      rumble.com
 // @require      https://github.com/Sighery/browser-userscripts/raw/refs/heads/master/common/NetworkPromise.js
 // @grant        GM_xmlhttpRequest
+// @grant        GM_setClipboard
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=rumble.com
 // ==/UserScript==
 
@@ -78,6 +79,12 @@ async function setupReactionbase() {
     let directButton = stringToNode(`<button class="video-btn" aria-label="Direct Rumble"><a target="_blank" href="${link}">Direct Rumble</a></button>`);
 
     target.appendChild(directButton);
+
+    let copyButton = stringToNode(`<button id="gm-script-copy-links" class="video-btn" aria-label="Copy links">Copy links</button>`);
+    target.appendChild(copyButton);
+
+    let copyLinks = `${window.location.href}  |  ${link}`;
+    document.getElementById("gm-script-copy-links").addEventListener("click", GM_setClipboard(copyLinks, "text"));
 }
 
 async function setupRumble() {
