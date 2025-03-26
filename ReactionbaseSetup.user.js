@@ -8,6 +8,7 @@
 // @match        https://reactionbase.site/*
 // @match        https://reactionbase.xyz/*
 // @connect      rumble.com
+// @require      https://github.com/Sighery/browser-userscripts/raw/refs/heads/master/common/NetworkPromise.js
 // @grant        GM_xmlhttpRequest
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=rumble.com
 // ==/UserScript==
@@ -118,66 +119,6 @@ async function setupRumble() {
 
     //     https://1a-1791.com/video/fwe2/e0/s8/2/T/n/l/d/Tnldy.caa.mp4?u=3&b=0
     //     https://1a-1791.com/video/fwe2/e0/s8/2/T/n/l/d/Tnldy.haa.mp4?u=3&b=0
-}
-
-class NetworkError extends Error {
-    constructor(response) {
-        super('Some kind of network error happened requesting ' + response.url);
-        this.name = 'NetworkError';
-        this.response = response;
-    }
-}
-
-
-class HttpError extends Error {
-    constructor(response) {
-        super(response.status + ' for ' + response.url);
-        this.name = 'HttpError';
-        this.response = response;
-    }
-}
-
-
-class TimeoutError extends Error {
-    constructor(response) {
-        super('Timeout for ' + response.url);
-        this.name = 'TimeoutError';
-        this.response = response;
-    }
-}
-
-function GM_xmlhttpRequestPromise(data) {
-    // Data can have a special parameter preventredirect to throw an error if
-    // final URL doesn't match initial URL (since there's no actual way to block
-    // redirections with XMLHttpRequest)
-    return new Promise((resolve, reject) => {
-        // Match old callback functions to Promise resolve/reject
-        data.onload = (response) => {
-            if (data.preventredirect === true && data.url !== response.finalUrl) {
-                response.url = data.url;
-                response.status = 302;
-                reject(new HttpError(response));
-            } else if (response.status === 200) {
-                resolve(response);
-            } else {
-                // Apparently errors >= 400 do not count to trigger onerror
-                response.url = response.finalUrl;
-                reject(new HttpError(response));
-            }
-        }
-        data.ontimeout = (response) => {
-            // Apparently Tampermonkey provides no response element for ontimeout
-            response.url = data.url;
-            reject(new TimeoutError(response));
-        }
-        data.onerror = (response) => {
-            // Seems this is only triggered by network errors
-            response.url = response.finalUrl;
-            reject(new NetworkError(response));
-        }
-
-        GM_xmlhttpRequest(data);
-    });
 }
 
 function stringToNode(html) {
