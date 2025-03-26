@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Reactionbase Setup
+// @name         RB Setup
 // @namespace    Sighery
 // @version      0.2
 // @description  Create direct link to Rumble, and setup Rumble videos to start, set max quality, and use wide view
@@ -19,8 +19,8 @@ const timer = ms => new Promise(res => setTimeout(res, ms));
 (async function () {
     'use strict';
 
-    if (isReactionbaseVideoPage()) {
-        await setupReactionbase();
+    if (isRBVideoPage()) {
+        await setupRB();
     } else if (window.location.href.match("(rumble\.com\/v)") !== null) {
         await setupRumble();
     }
@@ -47,14 +47,14 @@ function getRumbleEmbedLink() {
     return rumbleLink;
 }
 
-function isReactionbaseVideoPage() {
+function isRBVideoPage() {
     let site = window.location.href.match("(reactionbase\.*)");
     let rumbleVideo = getRumbleEmbedNode();
     if (rumbleVideo === null || site === null) return false;
     return true;
 }
 
-async function setupReactionbase() {
+async function setupRB() {
     let rumbleLink = getRumbleEmbedLink();
 
     console.log(`Fetching data of embed ${rumbleLink}`);
