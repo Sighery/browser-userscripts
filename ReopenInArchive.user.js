@@ -74,5 +74,13 @@ async function isArchiveAvailable() {
         // }),
     ];
 
-    return Promise.any(requests).then(() => archiveUrl).catch(() => null);
+    return Promise.any(requests).catch(() => null).then((res) => {
+        // Archive will always return 200 regardless, but some times the site is not yet archived.
+        // An easy way to test this without parsing HTML is to look at the path in the URL. If the
+        // URL still has `/newest/`, without resolving to a specific timestamp like
+        // `/20250326055136/`, it means it's not yet archived, and the HTML response is that of
+        // triggering an archive
+        let finalUrl = new URL(res.finalUrl);
+        return finalUrl.pathname.startsWith("/newest/") ? null : archiveUrl;
+    });
 }
