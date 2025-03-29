@@ -123,6 +123,10 @@ async function setupRumble() {
     video = getVideo();
     video.load();
 
+    // Now they've also decided to always expand the sidebar for some reason.
+    if (document.querySelector("html").classList.contains("main-menu-mode-permanent")) {
+        document.querySelector("button.main-menu-toggle").click();
+    }
 
     //     https://1a-1791.com/video/fwe2/e0/s8/2/T/n/l/d/Tnldy.caa.mp4?u=3&b=0
     //     https://1a-1791.com/video/fwe2/e0/s8/2/T/n/l/d/Tnldy.haa.mp4?u=3&b=0
