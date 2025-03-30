@@ -50,8 +50,7 @@ function getRumbleEmbedLink() {
 function isRBVideoPage() {
     let site = window.location.href.match("(reactionbase\.*)");
     let rumbleVideo = getRumbleEmbedNode();
-    if (rumbleVideo === null || site === null) return false;
-    return true;
+    return rumbleVideo !== null && site !== null;
 }
 
 async function setupRB() {
