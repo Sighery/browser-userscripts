@@ -100,56 +100,12 @@ async function fixMedia(media) {
     // Also, float the control bar at the bottom of the screen so it always follows
     let controlBar = media.querySelector(".vjs-control-bar");
 
-    const options = {
-        // This negative margin is needed otherwise it won't detect the header blocking the view
-        rootMargin: `-${getHeaderHeight()}px 0px 0px 0px`,
-        threshold: [0, 1.0],
-    }
-
     const setFloating = (node) => {
         node.style.position = "fixed";
         node.style.bottom = "0";
         node.style.left = "0";
         node.style.right = "0";
-        node.style.height = `${node.clientHeight}px`;
-    }
-    const clearFloating = (node) => {
-        node.style.position = "";
-        node.style.bottom = "";
-        node.style.left = "";
-        node.style.right = "";
-        node.style.height = "";
     }
 
-    let time = 0;
-    const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach((entry) => {
-            // Before the first click to start, the element is hidden
-            // Ignore it until it's clicked for the first time
-            // if (entry.target.checkVisibility() === false) {
-            //     return;
-            // }
-
-            entry.intersectionRatio === 1 ? clearFloating(entry.target) : setFloating(entry.target);
-            time++;
-            console.log("intersection");
-            console.log(entry);
-            console.log(entry.intersectionRatio);
-            if (time >= 4 && entry.intersectionRatio !== 1) { observer.disconnect() }
-        })
-    }, options);
-
-    observer.observe(controlBar);
-    console.log(observer);
-}
-
-
-function isVisible(domElement) {
-    return new Promise(resolve => {
-        const o = new IntersectionObserver(([entry]) => {
-            resolve(entry.intersectionRatio === 1);
-            o.disconnect();
-        });
-        o.observe(domElement);
-    });
+    setFloating(controlBar);
 }
