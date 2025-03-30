@@ -5,7 +5,7 @@
 // @description  Improve the experience in the DW LGN pages for learning German
 // @author       Sighery
 // @match        https://learngerman.dw.com/de/*langsam-gesprochene-nachrichten/*
-// @grant        none
+// @grant        GM_openInTab
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=dw.com
 // ==/UserScript==
 
@@ -22,10 +22,33 @@ const timer = ms => new Promise(res => setTimeout(res, ms));
     );
 
     let content = article.querySelector("div.content-area > div > span");
+    createTranslationsNode(content);
 
     let media = article.querySelector("section.media");
     await fixMedia(media);
 })();
+
+
+function createTranslationsNode(content) {
+    let button = document.createElement("button");
+    button.style.height = "50px";
+    button.style.width = "50px";
+    button.style.backgroundColor = "#5C718A";
+    button.style.position = "fixed";
+    button.style.bottom = "80px";
+    button.style.right = "25px";
+
+    button.addEventListener("click", () => {
+        // Chrome seems to open tabs in reverse, so first block/tab ends up last
+        let blocks = extractTextBlocks(content).reverse();
+
+        for (let block of blocks) {
+            GM_openInTab(generateDeeplLink(block));
+        }
+    });
+
+    document.body.appendChild(button);
+}
 
 
 function getHeaderHeight() {
