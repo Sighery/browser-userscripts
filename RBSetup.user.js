@@ -83,7 +83,7 @@ async function setupRB() {
     target.appendChild(copyButton);
 
     let copyLinks = `${window.location.href}  |  ${link}`;
-    document.getElementById("gm-script-copy-links").addEventListener("click", GM_setClipboard(copyLinks, "text"));
+    document.getElementById("gm-script-copy-links").addEventListener("click", () => GM_setClipboard(copyLinks, "text"));
 }
 
 async function setupRumble() {
