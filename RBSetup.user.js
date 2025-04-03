@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RB Setup
 // @namespace    Sighery
-// @version      0.2
+// @version      0.3
 // @description  Create direct link to Rumble, and setup Rumble videos to start, set max quality, and use wide view
 // @author       Sighery
 // @match        https://rumble.com/v*.html*
@@ -9,6 +9,7 @@
 // @match        https://reactionbase.xyz/*
 // @connect      rumble.com
 // @require      https://github.com/Sighery/browser-userscripts/raw/refs/heads/master/common/NetworkPromise.js
+// @require      https://github.com/Sighery/browser-userscripts/raw/refs/heads/master/common/ShortNotification.js
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=rumble.com
@@ -111,6 +112,7 @@ async function setupRumble() {
     let highestQuality = qualityOptions.children[qualityOptions.children.length - 1];
 
     console.log(`Setting quality ${highestQuality.textContent}`);
+    notify(`Quality ${highestQuality.textContent}`, 5000);
 
     highestQuality.click();
 
