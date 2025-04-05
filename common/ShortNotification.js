@@ -1,7 +1,7 @@
 function notify(message, timeout) {
     const remove = () => {
-        document.querySelector("#sighery-custom-notif").remove();
-        document.querySelector("#sighery-custom-notif-style").remove();
+        document.querySelector("#sighery-custom-notif")?.remove();
+        document.querySelector("#sighery-custom-notif-style")?.remove();
     }
 
     let notif = stringToNode(
@@ -22,11 +22,11 @@ function notify(message, timeout) {
           z-index: 999;
         }
 
+        .sighery-custom-notif-close {
+          width: 20px;
+        }
     `;
     let style = stringToNode(`<style type="text/css" id="sighery-custom-notif-style">${css}</style>`);
-
-    console.log(notif);
-    console.log(style);
 
     document.head.appendChild(style);
     document.body.appendChild(notif);
@@ -41,6 +41,5 @@ function notify(message, timeout) {
 function stringToNode(html) {
     const template = document.createElement("template");
     template.innerHTML = html;
-    console.log(template);
     return template.content.firstChild;
 };
