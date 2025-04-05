@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RB Setup
 // @namespace    Sighery
-// @version      0.3
+// @version      0.4
 // @description  Create direct link to Rumble, and setup Rumble videos to start, set max quality, and use wide view
 // @author       Sighery
 // @match        https://rumble.com/v*.html*
@@ -33,19 +33,11 @@ function getRumbleEmbedNode() {
 
 function getRumbleEmbedLink() {
     let rumbleVideo = getRumbleEmbedNode();
-
-    const endStr = "')";
-    const startStr = "changeVideo('";
-
     let rumbleLink = rumbleVideo.getAttribute("onclick");
-    if (rumbleLink.endsWith(endStr)) {
-        rumbleLink = rumbleLink.substring(0, rumbleLink.length - endStr.length);
-    }
-    if (rumbleLink.startsWith(startStr)) {
-        rumbleLink = rumbleLink.substring(startStr.length, rumbleLink.length);
-    }
 
-    return rumbleLink;
+    // const endStr = "')";
+    // const startStr = "changeVideo('";
+    return rumbleLink.replace(/^(changeVideo\(\')/, "").replace(/(\'\))$/, "");
 }
 
 function isRBVideoPage() {
@@ -122,7 +114,7 @@ async function setupRumble() {
     theaterToggle.click();
 
     video = getVideo();
-    video.load();
+    video.currentTime = 0;
 
     // Now they've also decided to always expand the sidebar for some reason.
     if (document.querySelector("html").classList.contains("main-menu-mode-permanent")) {
@@ -132,9 +124,3 @@ async function setupRumble() {
     //     https://1a-1791.com/video/fwe2/e0/s8/2/T/n/l/d/Tnldy.caa.mp4?u=3&b=0
     //     https://1a-1791.com/video/fwe2/e0/s8/2/T/n/l/d/Tnldy.haa.mp4?u=3&b=0
 }
-
-function stringToNode(html) {
-    const template = document.createElement("template");
-    template.innerHTML = html;
-    return template.content.firstChild;
-};
