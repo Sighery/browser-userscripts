@@ -2,7 +2,7 @@
 // @name         Willhaben Layout Fixer
 // @namespace    Sighery
 // @description  Improve Willhaben layout
-// @version      0.1
+// @version      0.2
 // @downloadURL  https://github.com/Sighery/browser-userscripts/raw/refs/heads/master/common/WillhabenLayoutFixer.user.js
 // @updateURL    https://github.com/Sighery/browser-userscripts/raw/refs/heads/master/common/WillhabenLayoutFixer.user.js
 // @author       Sighery
@@ -33,6 +33,10 @@
         }
 
         [id*='-result-list-'][id^='apn-'] {
+            display: none !important;
+        }
+
+        #apn-large-skyscraper {
             display: none !important;
         }
     `;
