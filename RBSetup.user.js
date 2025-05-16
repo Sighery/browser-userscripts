@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RB Setup
 // @namespace    Sighery
-// @version      0.4
+// @version      0.5
 // @description  Create direct link to Rumble, and setup Rumble videos to start, set max quality, and use wide view
 // @author       Sighery
 // @match        https://rumble.com/v*.html*
@@ -20,19 +20,37 @@ const timer = ms => new Promise(res => setTimeout(res, ms));
 (async function () {
     'use strict';
 
-    if (isRBVideoPage()) {
-        await setupRB();
+    let RBVideoPageVersion = await isRBVideoPage();
+    console.log(RBVideoPageVersion);
+    if (RBVideoPageVersion > 0) {
+        await setupRB(RBVideoPageVersion);
     } else if (window.location.href.match("(rumble\.com\/v)") !== null) {
         await setupRumble();
     }
 })();
 
-function getRumbleEmbedNode() {
-    return document.querySelector("#video-options .video-btn[onclick*='rumble.com/embed']");
+async function getRumbleEmbedNode(version) {
+    if (version === 1) {
+        return document.querySelector("#video-options .video-btn[onclick*='rumble.com/embed']");
+    } else if (version === 2) {
+        // Takes a little bit to load
+        let videoContainer = document.querySelector("#video-buttons");
+        while (videoContainer.children === 0) {
+            await timer(100);
+        }
+        let videoOptions = document.querySelectorAll("#video-buttons > button");
+        for (let option of videoOptions) {
+            if (option.textContent.toLowerCase() === "rumble") {
+                return option;
+            }
+        }
+    }
+
+    return null;
 }
 
-function getRumbleEmbedLink() {
-    let rumbleVideo = getRumbleEmbedNode();
+async function getRumbleEmbedLinkV1() {
+    let rumbleVideo = await getRumbleEmbedNode(1);
     let rumbleLink = rumbleVideo.getAttribute("onclick");
 
     // const endStr = "')";
@@ -40,14 +58,38 @@ function getRumbleEmbedLink() {
     return rumbleLink.replace(/^(changeVideo\(\')/, "").replace(/(\'\))$/, "");
 }
 
-function isRBVideoPage() {
-    let site = window.location.href.match("(reactionbase\.*)");
-    let rumbleVideo = getRumbleEmbedNode();
-    return rumbleVideo !== null && site !== null;
+async function getRumbleEmbedLinkV2() {
+    let rumbleOption = await getRumbleEmbedNode(2);
+    // Set Rumble option as active
+    if (!rumbleOption.classList.contains("active")) {
+        rumbleOption.click();
+    }
+
+    while (true) {
+        let link = document.querySelector("#video-player > iframe").getAttribute("src");
+        if (!link.includes("rumble")) {
+            await timer(100);
+        } else {
+            return link;
+        }
+    }
 }
 
-async function setupRB() {
-    let rumbleLink = getRumbleEmbedLink();
+async function isRBVideoPage() {
+    let site = window.location.href.match("(reactionbase\.*)");
+    if (site === null) return 0;
+    if (await getRumbleEmbedNode(1) !== null) return 1;
+    if (await getRumbleEmbedNode(2) !== null) return 2;
+    return 0;
+}
+
+async function setupRB(version) {
+    let rumbleLink = null;
+    if (version === 1) {
+        rumbleLink = await getRumbleEmbedLinkV1();
+    } else if (version === 2) {
+        rumbleLink = await getRumbleEmbedLinkV2();
+    }
 
     console.log(`Fetching data of embed ${rumbleLink}`);
 
@@ -66,15 +108,21 @@ async function setupRB() {
         return false;
     }
 
-    let target = document.querySelector("#video-options");
-
-    let directButton = stringToNode(`<button class="video-btn" aria-label="Direct Rumble"><a target="_blank" href="${link}">Direct Rumble</a></button>`);
+    let target = null;
+    let directButton = null;
+    let copyButton = null;
+    if (version === 1) {
+        target = document.querySelector("#video-options");
+        directButton = stringToNode(`<button class="video-btn" aria-label="Direct Rumble"><a target="_blank" href="${link}">Direct Rumble</a></button>`);
+        copyButton = stringToNode(`<button id="gm-script-copy-links" class="video-btn" aria-label="Copy links">Copy links</button>`);
+    } else if (version === 2) {
+        target = document.querySelector("#video-buttons");
+        directButton = stringToNode(`<button class="switch-btn"><a target="_blank" href="${link}">Direct Rumble</a></button>`);
+        copyButton = stringToNode(`<button id="gm-script-copy-links" class="switch-btn">Copy links</button>`);
+    }
 
     target.appendChild(directButton);
-
-    let copyButton = stringToNode(`<button id="gm-script-copy-links" class="video-btn" aria-label="Copy links">Copy links</button>`);
     target.appendChild(copyButton);
-
     let copyLinks = `${window.location.href}  |  ${link}`;
     document.getElementById("gm-script-copy-links").addEventListener("click", () => GM_setClipboard(copyLinks, "text"));
 }
