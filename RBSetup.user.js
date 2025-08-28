@@ -58,13 +58,7 @@ async function getRumbleEmbedLinkV1() {
     return rumbleLink.replace(/^(changeVideo\(\')/, "").replace(/(\'\))$/, "");
 }
 
-async function getRumbleEmbedLinkV2() {
-    let rumbleOption = await getRumbleEmbedNode(2);
-    // Set Rumble option as active
-    if (!rumbleOption.classList.contains("active")) {
-        rumbleOption.click();
-    }
-
+async function extractRumbleLinkFromEmbed() {
     while (true) {
         let link = document.querySelector("#video-player > iframe").getAttribute("src");
         if (!link.includes("rumble")) {
@@ -75,9 +69,29 @@ async function getRumbleEmbedLinkV2() {
     }
 }
 
+async function getRumbleEmbedLinkV2() {
+    let rumbleOption = await getRumbleEmbedNode(2);
+    // Set Rumble option as active
+    if (!rumbleOption.classList.contains("active")) {
+        rumbleOption.click();
+    }
+
+    return extractRumbleLinkFromEmbed();
+}
+
+async function getRumbleEmbedLinkV3() {
+    let rumbleData = videoData.find(x => x.url.includes("rumble.com"));
+    let rumbleOption = Array.from(document.querySelectorAll("#video-buttons > .switch-btn")).find(x => x.textContent == rumbleData.name);
+    // Set Rumble option as active
+    if (!rumbleOption.classList.contains("active")) rumbleOption.click();
+
+    return extractRumbleLinkFromEmbed();
+}
+
 async function isRBVideoPage() {
     let site = window.location.href.match("(reactionbase\.*)");
     if (site === null) return 0;
+    if (typeof videoData !== 'undefined') return 3;
     if (await getRumbleEmbedNode(1) !== null) return 1;
     if (await getRumbleEmbedNode(2) !== null) return 2;
     return 0;
@@ -89,6 +103,8 @@ async function setupRB(version) {
         rumbleLink = await getRumbleEmbedLinkV1();
     } else if (version === 2) {
         rumbleLink = await getRumbleEmbedLinkV2();
+    } else if (version === 3) {
+        rumbleLink = await getRumbleEmbedLinkV3();
     }
 
     console.log(`Fetching data of embed ${rumbleLink}`);
@@ -115,7 +131,7 @@ async function setupRB(version) {
         target = document.querySelector("#video-options");
         directButton = stringToNode(`<button class="video-btn" aria-label="Direct Rumble"><a target="_blank" href="${link}">Direct Rumble</a></button>`);
         copyButton = stringToNode(`<button id="gm-script-copy-links" class="video-btn" aria-label="Copy links">Copy links</button>`);
-    } else if (version === 2) {
+    } else if (version === 2 || version === 3) {
         target = document.querySelector("#video-buttons");
         directButton = stringToNode(`<button class="switch-btn"><a target="_blank" href="${link}">Direct Rumble</a></button>`);
         copyButton = stringToNode(`<button id="gm-script-copy-links" class="switch-btn">Copy links</button>`);
