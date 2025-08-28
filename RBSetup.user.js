@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RB Setup
 // @namespace    Sighery
-// @version      0.5
+// @version      0.6
 // @description  Create direct link to Rumble, and setup Rumble videos to start, set max quality, and use wide view
 // @author       Sighery
 // @match        https://rumble.com/v*.html*
@@ -98,6 +98,11 @@ async function isRBVideoPage() {
 }
 
 async function setupRB(version) {
+    // Block the site from disabling right-click
+    document.addEventListener("contextmenu", function(e) {
+        e.stopImmediatePropagation();
+    }, true);
+
     let rumbleLink = null;
     if (version === 1) {
         rumbleLink = await getRumbleEmbedLinkV1();
