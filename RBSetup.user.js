@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RB Setup
 // @namespace    Sighery
-// @version      0.6
+// @version      0.7
 // @description  Create direct link to Rumble, and setup Rumble videos to start, set max quality, and use wide view
 // @author       Sighery
 // @match        https://rumble.com/v*.html*
@@ -12,7 +12,7 @@
 // @require      https://github.com/Sighery/browser-userscripts/raw/refs/heads/master/common/ShortNotification.js
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=rumble.com
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=reactionbase.xyz
 // ==/UserScript==
 
 const timer = ms => new Promise(res => setTimeout(res, ms));
@@ -21,7 +21,7 @@ const timer = ms => new Promise(res => setTimeout(res, ms));
     'use strict';
 
     let RBVideoPageVersion = await isRBVideoPage();
-    console.log(RBVideoPageVersion);
+    console.log(`RB page version: ${RBVideoPageVersion}`);
     if (RBVideoPageVersion > 0) {
         await setupRB(RBVideoPageVersion);
     } else if (window.location.href.match("(rumble\.com\/v)") !== null) {
@@ -58,9 +58,9 @@ async function getRumbleEmbedLinkV1() {
     return rumbleLink.replace(/^(changeVideo\(\')/, "").replace(/(\'\))$/, "");
 }
 
-async function extractRumbleLinkFromEmbed() {
+async function extractRumbleLinkFromEmbed(iframeSelector) {
     while (true) {
-        let link = document.querySelector("#video-player > iframe").getAttribute("src");
+        let link = document.querySelector(iframeSelector).getAttribute("src");
         if (!link.includes("rumble")) {
             await timer(100);
         } else {
@@ -76,7 +76,7 @@ async function getRumbleEmbedLinkV2() {
         rumbleOption.click();
     }
 
-    return extractRumbleLinkFromEmbed();
+    return extractRumbleLinkFromEmbed("#video-player > iframe");
 }
 
 async function getRumbleEmbedLinkV3() {
@@ -85,13 +85,18 @@ async function getRumbleEmbedLinkV3() {
     // Set Rumble option as active
     if (!rumbleOption.classList.contains("active")) rumbleOption.click();
 
-    return extractRumbleLinkFromEmbed();
+    return extractRumbleLinkFromEmbed("#video-player > iframe");
+}
+
+async function getRumbleEmbedLinkV4() {
+    return extractRumbleLinkFromEmbed("iframe[src*='rumble']");
 }
 
 async function isRBVideoPage() {
     let site = window.location.href.match("(reactionbase\.*)");
     if (site === null) return 0;
     if (typeof videoData !== 'undefined') return 3;
+    if (document.querySelector("iframe[src*='rumble']")) return 4;
     if (await getRumbleEmbedNode(1) !== null) return 1;
     if (await getRumbleEmbedNode(2) !== null) return 2;
     return 0;
@@ -99,7 +104,7 @@ async function isRBVideoPage() {
 
 async function setupRB(version) {
     // Block the site from disabling right-click
-    document.addEventListener("contextmenu", function(e) {
+    document.addEventListener("contextmenu", function (e) {
         e.stopImmediatePropagation();
     }, true);
 
@@ -110,6 +115,8 @@ async function setupRB(version) {
         rumbleLink = await getRumbleEmbedLinkV2();
     } else if (version === 3) {
         rumbleLink = await getRumbleEmbedLinkV3();
+    } else if (version === 4) {
+        rumbleLink = await getRumbleEmbedLinkV4();
     }
 
     console.log(`Fetching data of embed ${rumbleLink}`);
@@ -140,6 +147,10 @@ async function setupRB(version) {
         target = document.querySelector("#video-buttons");
         directButton = stringToNode(`<button class="switch-btn"><a target="_blank" href="${link}">Direct Rumble</a></button>`);
         copyButton = stringToNode(`<button id="gm-script-copy-links" class="switch-btn">Copy links</button>`);
+    } else if (version === 4) {
+        target = document.querySelector("#content");
+        directButton = stringToNode(`<button><a target="_blank" href="${link}">Direct Rumble</a></button>`);
+        copyButton = stringToNode(`<button id="gm-script-copy-links">Copy links</button>`);
     }
 
     target.appendChild(directButton);
