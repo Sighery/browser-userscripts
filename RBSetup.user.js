@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RB Setup
 // @namespace    Sighery
-// @version      0.7
+// @version      0.8
 // @description  Create direct link to Rumble, and setup Rumble videos to start, set max quality, and use wide view
 // @author       Sighery
 // @match        https://rumble.com/v*.html*
@@ -197,7 +197,7 @@ async function setupRumble() {
     video.currentTime = 0;
 
     // Now they've also decided to always expand the sidebar for some reason.
-    if (document.querySelector("html").classList.contains("main-menu-mode-permanent")) {
+    if (document.querySelector("html").classList.contains("main-menu-expanded")) {
         document.querySelector("button.main-menu-toggle").click();
     }
 
