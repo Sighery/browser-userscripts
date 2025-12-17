@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RB Setup
 // @namespace    Sighery
-// @version      0.8
+// @version      0.9
 // @description  Create direct link to Rumble, and setup Rumble videos to start, set max quality, and use wide view
 // @author       Sighery
 // @match        https://rumble.com/v*.html*
@@ -12,6 +12,7 @@
 // @require      https://github.com/Sighery/browser-userscripts/raw/refs/heads/master/common/ShortNotification.js
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
+// @grant        GM_audio
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=reactionbase.xyz
 // ==/UserScript==
 
@@ -162,6 +163,8 @@ async function setupRB(version) {
 async function setupRumble() {
     await timer(1500);
 
+    await GM.audio.setMute({isMuted: true});
+
     const getVideo = () => {
         return document.querySelector(".videoPlayer-Rumble-cls video");
     }
@@ -200,6 +203,8 @@ async function setupRumble() {
     if (document.querySelector("html").classList.contains("main-menu-expanded")) {
         document.querySelector("button.main-menu-toggle").click();
     }
+
+    await GM.audio.setMute({isMuted: false});
 
     //     https://1a-1791.com/video/fwe2/e0/s8/2/T/n/l/d/Tnldy.caa.mp4?u=3&b=0
     //     https://1a-1791.com/video/fwe2/e0/s8/2/T/n/l/d/Tnldy.haa.mp4?u=3&b=0
