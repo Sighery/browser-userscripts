@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         RB Setup
 // @namespace    Sighery
-// @version      0.9
+// @version      0.10
 // @description  Create direct link to Rumble, and setup Rumble videos to start, set max quality, and use wide view
 // @author       Sighery
 // @match        https://rumble.com/v*.html*
+// @match        https://rumble.com/embed/*
 // @match        https://reactionbase.site/*
 // @match        https://reactionbase.xyz/*
 // @connect      rumble.com
@@ -21,6 +22,11 @@ const timer = ms => new Promise(res => setTimeout(res, ms));
 (async function () {
     'use strict';
 
+    if (window.location.href.includes("rumble.com/embed/")) {
+        redirectRumbleEmbed();
+        return null;
+    }
+
     let RBVideoPageVersion = await isRBVideoPage();
     console.log(`RB page version: ${RBVideoPageVersion}`);
     if (RBVideoPageVersion > 0) {
@@ -29,6 +35,16 @@ const timer = ms => new Promise(res => setTimeout(res, ms));
         await setupRumble();
     }
 })();
+
+async function redirectRumbleEmbed() {
+    let href = document.querySelector("link[rel='canonical']")?.href;
+    if (href === null) {
+        console.warn("No ref link found?");
+        return null;
+    }
+
+    window.location.href = href;
+}
 
 async function getRumbleEmbedNode(version) {
     if (version === 1) {
@@ -163,7 +179,7 @@ async function setupRB(version) {
 async function setupRumble() {
     await timer(1500);
 
-    await GM.audio.setMute({isMuted: true});
+    await GM.audio.setMute({ isMuted: true });
 
     const getVideo = () => {
         return document.querySelector(".videoPlayer-Rumble-cls video");
@@ -204,7 +220,7 @@ async function setupRumble() {
         document.querySelector("button.main-menu-toggle").click();
     }
 
-    await GM.audio.setMute({isMuted: false});
+    await GM.audio.setMute({ isMuted: false });
 
     //     https://1a-1791.com/video/fwe2/e0/s8/2/T/n/l/d/Tnldy.caa.mp4?u=3&b=0
     //     https://1a-1791.com/video/fwe2/e0/s8/2/T/n/l/d/Tnldy.haa.mp4?u=3&b=0
