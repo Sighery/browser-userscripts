@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         RB Setup
 // @namespace    Sighery
-// @version      0.10
+// @version      0.11
 // @description  Create direct link to Rumble, and setup Rumble videos to start, set max quality, and use wide view
 // @author       Sighery
 // @match        https://rumble.com/v*.html*
 // @match        https://rumble.com/embed/*
 // @match        https://reactionbase.site/*
 // @match        https://reactionbase.xyz/*
+// @match        https://reactionbase.app/*
 // @connect      rumble.com
 // @require      https://github.com/Sighery/browser-userscripts/raw/refs/heads/master/common/NetworkPromise.js
 // @require      https://github.com/Sighery/browser-userscripts/raw/refs/heads/master/common/ShortNotification.js
@@ -22,6 +23,11 @@ const timer = ms => new Promise(res => setTimeout(res, ms));
 (async function () {
     'use strict';
 
+    if (window.location.href.includes("reactionbase.app/post/")) {
+        bypassRBPost();
+        return null;
+    }
+
     if (window.location.href.includes("rumble.com/embed/")) {
         redirectRumbleEmbed();
         return null;
@@ -35,6 +41,60 @@ const timer = ms => new Promise(res => setTimeout(res, ms));
         await setupRumble();
     }
 })();
+
+async function bypassRBPost() {
+    await timer(1500);
+
+    const unlockButton = document.evaluate(
+        "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'unlock content')]",
+        document,
+        null,
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
+        null,
+    ).singleNodeValue;
+
+    if (unlockButton === null) {
+        console.warn("Couldn't locate button? Exiting");
+        return;
+    }
+
+    if (!unlockButton.checkVisibility()) {
+        console.log("Button not visible, assuming content is unlocked");
+        return;
+    }
+
+    const unlockSection = unlockButton.parentElement;
+    let unlockInput;
+
+    let waitCount = 2000;
+
+    while (true) {
+        if (waitCount >= 2000) {
+            unlockButton.click();
+            console.log("Clicked button");
+            waitCount = 0;
+        }
+
+        unlockInput = unlockSection.querySelector("input[value*='/unlock']");
+        if (unlockInput === null) {
+            await timer(200);
+            waitCount += 200;
+            console.log("Waiting for unlock request to go through...");
+            continue;
+        }
+
+        break;
+    }
+
+    const unlockUrl = new URL(unlockInput.value)
+    const unlockToken = unlockUrl.pathname.replace("/unlock/", "");
+    console.warn(`Unlock code is ${unlockToken}, redirecting...`);
+
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set("pass", unlockToken);
+    console.warn(currentUrl.href);
+    window.location.href = currentUrl.href;
+}
 
 async function redirectRumbleEmbed() {
     let href = document.querySelector("link[rel='canonical']")?.href;
