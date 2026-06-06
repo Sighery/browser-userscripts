@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RB Setup
 // @namespace    Sighery
-// @version      0.11
+// @version      0.12
 // @description  Create direct link to Rumble, and setup Rumble videos to start, set max quality, and use wide view
 // @author       Sighery
 // @match        https://rumble.com/v*.html*
@@ -86,8 +86,13 @@ async function bypassRBPost() {
         break;
     }
 
-    const unlockUrl = new URL(unlockInput.value)
-    const unlockToken = unlockUrl.pathname.replace("/unlock/", "");
+    const unlockUrl = new URL(unlockInput.value);
+    let unlockToken;
+    if (unlockUrl.searchParams.has("token")) {
+        unlockToken = unlockUrl.searchParams.get("token");
+    } else {
+        unlockToken = unlockUrl.pathname.replace("/unlock/", "");
+    }
     console.warn(`Unlock code is ${unlockToken}, redirecting...`);
 
     const currentUrl = new URL(window.location.href);
