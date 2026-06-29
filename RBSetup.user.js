@@ -9,6 +9,7 @@
 // @match        https://reactionbase.site/*
 // @match        https://reactionbase.xyz/*
 // @match        https://reactionbase.app/*
+// @noframes
 // @connect      rumble.com
 // @require      https://github.com/Sighery/browser-userscripts/raw/refs/heads/master/common/NetworkPromise.js
 // @require      https://github.com/Sighery/browser-userscripts/raw/refs/heads/master/common/ShortNotification.js
