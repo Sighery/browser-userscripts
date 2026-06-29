@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         RB Setup
 // @namespace    Sighery
-// @version      0.12
+// @version      0.13
 // @description  Create direct link to Rumble, and setup Rumble videos to start, set max quality, and use wide view
 // @author       Sighery
 // @match        https://rumble.com/v*.html*
@@ -244,13 +244,17 @@ async function setupRB(version) {
 async function setupRumble() {
     await timer(1500);
 
-    await GM.audio.setMute({ isMuted: true });
-
     const getVideo = () => {
         return document.querySelector(".videoPlayer-Rumble-cls video");
     }
 
-    let video = getVideo();
+    let video = null;
+    while ((video = getVideo()) === null) {
+        await timer(500);
+        console.warn("Video not yet loaded, waiting");
+    }
+
+    await GM.audio.setMute({ isMuted: true });
 
     video.click();
     await timer(500);
